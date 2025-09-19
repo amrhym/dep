@@ -1,12 +1,8 @@
 class Internal::ReconcilePlanConfigService
   def perform
+    # Bypass: Skip all plan reconciliation - we're always enterprise
     remove_premium_config_reset_warning
-    return if ChatwootHub.pricing_plan != 'community'
-
-    create_premium_config_reset_warning if premium_config_reset_required?
-
-    reconcile_premium_config
-    reconcile_premium_features
+    return # Always return early to prevent any feature disabling
   end
 
   private

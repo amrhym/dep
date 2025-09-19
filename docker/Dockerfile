@@ -1,6 +1,6 @@
 # pre-build stage
-FROM node:23-alpine as node
-FROM ruby:3.4.4-alpine3.21 AS pre-builder
+FROM node:23-bullseye-slim as node
+FROM ruby:3.4.4-slim AS pre-builder
 
 ARG NODE_VERSION="23.7.0"
 ARG PNPM_VERSION="10.2.0"
@@ -24,33 +24,35 @@ ENV NODE_OPTIONS ${NODE_OPTIONS}
 
 ENV BUNDLE_PATH="/gems"
 
-RUN apk update && apk add --no-cache \
-  openssl \
-  tar \
-  build-base \
+# System deps needed for native gem compilation (grpc, nokogiri, etc.)
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  build-essential \
+  pkg-config \
+  autoconf automake libtool \
   tzdata \
-  postgresql-dev \
-  postgresql-client \
-  git \
-  curl \
-  xz \
-  && mkdir -p /var/app \
-  && gem install bundler
+  libpq-dev postgresql-client \
+  zlib1g-dev libssl-dev libc-ares-dev \
+  git curl xz-utils \
+  imagemagick \
+  libvips libvips-dev \
+  && rm -rf /var/lib/apt/lists/* \
+  && gem install bundler -v ${BUNDLER_VERSION}
 
+# Provide node/npm from the node stage and install pnpm
 COPY --from=node /usr/local/bin/node /usr/local/bin/
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
-  && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+  && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+  && npm install -g pnpm@${PNPM_VERSION}
 
-RUN npm install -g pnpm@${PNPM_VERSION}
-
+# pnpm env
 RUN echo 'export PNPM_HOME="/root/.local/share/pnpm"' >> /root/.shrc \
   && echo 'export PATH="$PNPM_HOME:$PATH"' >> /root/.shrc \
   && export PNPM_HOME="/root/.local/share/pnpm" \
   && export PATH="$PNPM_HOME:$PATH" \
   && pnpm --version
 
-# Persist the environment variables in Docker
+# Persist PNPM env
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
@@ -58,17 +60,12 @@ WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
 
-# natively compile grpc and protobuf to support alpine musl (dialogflow-docker workflow)
-# https://github.com/googleapis/google-cloud-ruby/issues/13306
-# adding xz as nokogiri was failing to build libxml
-# https://github.com/chatwoot/chatwoot/issues/4045
-RUN apk update && apk add --no-cache build-base musl ruby-full ruby-dev gcc make musl-dev openssl openssl-dev g++ linux-headers xz vips
-RUN bundle config set --local force_ruby_platform true
 
 # Do not install development or test gems in production
+# Limit MAKEFLAGS parallelism to avoid OOM/timeouts during grpc native build
 RUN if [ "$RAILS_ENV" = "production" ]; then \
-  bundle config set without 'development test'; bundle install -j 4 -r 3; \
-  else bundle install -j 4 -r 3; \
+  bundle config set without 'development test'; MAKEFLAGS="-j2" bundle install -j 2 -r 3; \
+  else MAKEFLAGS="-j2" bundle install -j 2 -r 3; \
   fi
 
 COPY package.json pnpm-lock.yaml ./
@@ -82,21 +79,21 @@ RUN mkdir -p /app/log
 
 # generate production assets if production environment
 RUN if [ "$RAILS_ENV" = "production" ]; then \
-  SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
+  SKIP_DB_INITIALIZERS=1 SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
   && rm -rf spec node_modules tmp/cache; \
   fi
 
 # Generate .git_sha file with current commit hash
-RUN git rev-parse HEAD > /app/.git_sha
+RUN git rev-parse HEAD > /app/.git_sha || echo unknown > /app/.git_sha
 
 # Remove unnecessary files
 RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
   && find /gems/ruby/3.4.0/gems/ \( -name "*.c" -o -name "*.o" \) -delete \
   && rm -rf .git \
-  && rm .gitignore
+  && rm -f .gitignore
 
-# final build stage
-FROM ruby:3.4.4-alpine3.21
+# final build stage (runtime)
+FROM ruby:3.4.4-slim
 
 ARG NODE_VERSION="23.7.0"
 ARG PNPM_VERSION="10.2.0"
@@ -113,29 +110,28 @@ ENV EXECJS_RUNTIME ${EXECJS_RUNTIME}
 ARG RAILS_SERVE_STATIC_FILES=true
 ENV RAILS_SERVE_STATIC_FILES ${RAILS_SERVE_STATIC_FILES}
 
-ARG BUNDLE_FORCE_RUBY_PLATFORM=1
-ENV BUNDLE_FORCE_RUBY_PLATFORM ${BUNDLE_FORCE_RUBY_PLATFORM}
 
 ARG RAILS_ENV=production
 ENV RAILS_ENV ${RAILS_ENV}
 ENV BUNDLE_PATH="/gems"
 
-RUN apk update && apk add --no-cache \
-  build-base \
-  openssl \
+# Runtime dependencies
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   tzdata \
   postgresql-client \
   imagemagick \
-  git \
-  vips \
-  && gem install bundler
+  libvips \
+  git curl \
+  && rm -rf /var/lib/apt/lists/* \
+  && gem install bundler -v ${BUNDLER_VERSION}
 
+# Provide node so that dev images can run vite if needed
 COPY --from=node /usr/local/bin/node /usr/local/bin/
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 
+# Only install pnpm on non-prod images
 RUN if [ "$RAILS_ENV" != "production" ]; then \
-  apk add --no-cache curl \
-  && ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+  ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
   && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
   && npm install -g pnpm@${PNPM_VERSION} \
   && pnpm --version; \

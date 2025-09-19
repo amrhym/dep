@@ -1,0 +1,50 @@
+version: "3.8"
+
+# This file runs PostgreSQL, Redis, and MailHog as standalone services
+# accessible from the host and other Docker containers via host.docker.internal
+
+services:
+  postgres-external:
+    image: pgvector/pgvector:pg16
+    container_name: chatwoot-postgres-external
+    environment:
+      - POSTGRES_DB=chatwoot_production
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=28d6f8da48cf9cbaf8ab768475d64242598325ac232f4638
+    volumes:
+      - postgres_external_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # Accessible on all interfaces
+    restart: unless-stopped
+    networks:
+      - chatwoot-external
+
+  redis-external:
+    image: redis:alpine
+    container_name: chatwoot-redis-external
+    command: ["sh", "-c", "redis-server --requirepass 97d808d2b192117ecec966e85056117f --bind 0.0.0.0"]
+    volumes:
+      - redis_external_data:/data
+    ports:
+      - "6379:6379"  # Accessible on all interfaces
+    restart: unless-stopped
+    networks:
+      - chatwoot-external
+
+  mailhog-external:
+    image: mailhog/mailhog
+    container_name: chatwoot-mailhog-external
+    ports:
+      - "1025:1025"  # SMTP - Accessible on all interfaces
+      - "8025:8025"  # Web UI - Accessible on all interfaces
+    restart: unless-stopped
+    networks:
+      - chatwoot-external
+
+networks:
+  chatwoot-external:
+    driver: bridge
+
+volumes:
+  postgres_external_data:
+  redis_external_data:

@@ -2,6 +2,7 @@
 
 require 'agents'
 
+if ENV['SKIP_DB_INITIALIZERS'] != '1'
 Rails.application.config.after_initialize do
   api_key = InstallationConfig.find_by(name: 'CAPTAIN_OPEN_AI_API_KEY')&.value
   model = InstallationConfig.find_by(name: 'CAPTAIN_OPEN_AI_MODEL')&.value.presence || OpenAiConstants::DEFAULT_MODEL
@@ -20,4 +21,5 @@ Rails.application.config.after_initialize do
   end
 rescue StandardError => e
   Rails.logger.error "Failed to configure AI Agents SDK: #{e.message}"
+end
 end
