@@ -65,7 +65,15 @@ services:
       - "127.0.0.1:8025:8025"
     restart: unless-stopped
 
-
+  rag-service:
+    build: ./services/rag-service
+    environment:
+      - RAG_DB_URL=${RAG_DB_URL:-postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres}
+      - RAG_VECTOR_SCHEMA=rag
+    depends_on:
+      - postgres
+      - redis
+    # Do not expose any host ports; internal network only
 
 volumes:
   storage_data:

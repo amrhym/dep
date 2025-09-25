@@ -22,6 +22,30 @@ class Captain::Tools::SimplePageCrawlParserJob < ApplicationJob
     document.update!(
       name: page_title[0..254], content: content[0..14_999], status: :available
     )
+
+    # Optional RAG indexing
+    if ENV['FEATURE_RAG_ENABLED'] == 'true'
+      begin
+        require 'rag/client'
+        rag = Rag::Client.new(
+          base_url: ENV.fetch('RAG_BASE_URL', 'http://rag-service:8000'),
+          hmac_key: ENV['RAG_AUTH_HMAC_KEY'],
+          timeout: (ENV['RAG_TIMEOUT'] || 15).to_i
+        )
+        rag.index(
+          text: content,
+          source: page_link,
+          metadata: {
+            account_id: account.id,
+            assistant_id: assistant.id,
+            document_id: document.id,
+            name: document.name
+          }
+        )
+      rescue StandardError => e
+        Rails.logger.warn("[RAG] Index failed for #{page_link}: #{e.message}")
+      end
+    end
   rescue StandardError => e
     raise "Failed to parse data: #{page_link} #{e.message}"
   end

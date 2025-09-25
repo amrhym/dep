@@ -209,3 +209,7 @@
   display_name: SAML
   enabled: false
   premium: true
+- name: rag_integration
+  display_name: RAG Integration (LangChain)
+  enabled: false
+  chatwoot_internal: true
