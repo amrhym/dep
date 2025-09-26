@@ -6,6 +6,7 @@ import configMixin from '../mixins/configMixin';
 import { isEmptyObject } from 'widget/helpers/utils';
 import { ON_CONVERSATION_CREATED } from '../constants/widgetBusEvents';
 import { emitter } from 'shared/helpers/mitt';
+import IntegrationAPIClient from 'widget/api/integration';
 
 export default {
   components: {
@@ -26,9 +27,22 @@ export default {
   methods: {
     ...mapActions('conversation', ['clearConversations']),
     ...mapActions('conversationAttributes', ['clearConversationAttributes']),
-    handleConversationCreated() {
+    async handleConversationCreated() {
       // Redirect to messages page after conversation is created
       this.router.replace({ name: 'messages' });
+      // Auto-create and join Dyte meeting if requested from Home
+      if (window.chatwootDyteAutoStart) {
+        try {
+          const { data } = await IntegrationAPIClient.createDyteMeeting();
+          if (data && data.id) {
+            emitter.emit('dyte:auto-join', data.id);
+          }
+        } catch (e) {
+          // ignore
+        } finally {
+          window.chatwootDyteAutoStart = false;
+        }
+      }
       // Only after successful navigation, reset the isUpdatingRoute UIflag in app/javascript/widget/router.js
       // See issue: https://github.com/chatwoot/chatwoot/issues/10736
     },

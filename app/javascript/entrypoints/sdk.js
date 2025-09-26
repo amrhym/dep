@@ -192,6 +192,10 @@ const runSDK = ({ baseUrl, websiteToken }) => {
       });
     },
 
+    dyteJoin({ scheduledId, meetingId } = {}) {
+      IFrameHelper.sendMessage('dyte-join', { scheduledId, meetingId });
+    },
+
     reset() {
       if (window.$chatwoot.isOpen) {
         IFrameHelper.events.toggleBubble();

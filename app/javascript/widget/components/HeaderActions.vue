@@ -5,6 +5,8 @@ import { popoutChatWindow } from '../helpers/popoutHelper';
 import FluentIcon from 'shared/components/FluentIcon/Index.vue';
 import configMixin from 'widget/mixins/configMixin';
 import { CONVERSATION_STATUS } from 'shared/constants/messages';
+import IntegrationAPIClient from 'widget/api/integration';
+import { emitter } from 'shared/helpers/mitt';
 
 export default {
   name: 'HeaderActions',
@@ -63,6 +65,18 @@ export default {
         authToken
       );
     },
+    async startVideoCall() {
+      try {
+        const { data } = await IntegrationAPIClient.createDyteMeeting();
+        // data.id is the message ID created by the backend integration message
+        const messageId = data && data.id;
+        if (messageId) {
+          emitter.emit('dyte:join-message', messageId);
+        }
+      } catch (e) {
+        // silently ignore for now, or add a small alert later
+      }
+    },
     closeWindow() {
       if (IFrameHelper.isIFrame()) {
         IFrameHelper.sendMessage({ event: 'closeWindow' });
@@ -99,6 +113,14 @@ export default {
       @click="popoutWindow"
     >
       <FluentIcon icon="open" size="22" class="text-n-slate-12" />
+    </button>
+    <button
+      v-if="conversationStatus === 'open'"
+      class="button transparent compact"
+      :title="$t('Start video call')"
+      @click="startVideoCall"
+    >
+      <FluentIcon icon="video-add" size="22" class="text-n-slate-12" />
     </button>
     <button
       class="button transparent compact close-button"

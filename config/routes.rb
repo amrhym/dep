@@ -270,10 +270,11 @@ Rails.application.routes.draw do
                 get :list_all_channels
               end
             end
-            resource :dyte, controller: 'dyte', only: [] do
+resource :dyte, controller: 'dyte', only: [] do
               collection do
                 post :create_a_meeting
                 post :add_participant_to_meeting
+                post :reschedule
               end
             end
             resource :shopify, controller: 'shopify', only: [:destroy] do
@@ -363,9 +364,12 @@ Rails.application.routes.draw do
         resources :inbox_members, only: [:index]
         resources :labels, only: [:create, :destroy]
         namespace :integrations do
-          resource :dyte, controller: 'dyte', only: [] do
+resource :dyte, controller: 'dyte', only: [] do
             collection do
+              post :create_a_meeting
               post :add_participant_to_meeting
+              post :schedule
+              post :join
             end
           end
         end

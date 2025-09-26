@@ -12,6 +12,15 @@ class Integrations::Dyte::ProcessorService
     message.push_event_data
   end
 
+  # Create a Dyte meeting and return the meeting hash without creating a chat message.
+  def create_meeting_only(agent)
+    title = I18n.t('integration_apps.dyte.meeting_name', agent_name: agent.available_name)
+    response = dyte_client.create_a_meeting(title)
+    return response if response[:error].present?
+
+    response # includes { 'id' => 'meeting_id' }
+  end
+
   def add_participant_to_meeting(meeting_id, user)
     dyte_client.add_participant_to_meeting(meeting_id, user.id, user.name, avatar_url(user))
   end

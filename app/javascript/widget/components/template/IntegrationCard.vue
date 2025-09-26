@@ -4,6 +4,7 @@ import FluentIcon from 'shared/components/FluentIcon/Index.vue';
 import { buildDyteURL } from 'shared/helpers/IntegrationHelper';
 import { getContrastingTextColor } from '@chatwoot/utils';
 import { mapGetters } from 'vuex';
+import { emitter } from 'shared/helpers/mitt';
 
 export default {
   components: {
@@ -26,6 +27,20 @@ export default {
     meetingLink() {
       return buildDyteURL(this.dyteAuthToken);
     },
+  },
+  mounted() {
+    // Auto-join when asked for this specific message id
+    this._dyteAutoJoinHandler = messageId => {
+      if (messageId === this.messageId) {
+        this.joinTheCall();
+      }
+    };
+    emitter.on('dyte:auto-join', this._dyteAutoJoinHandler);
+  },
+  beforeUnmount() {
+    if (this._dyteAutoJoinHandler) {
+      emitter.off('dyte:auto-join', this._dyteAutoJoinHandler);
+    }
   },
   methods: {
     async joinTheCall() {

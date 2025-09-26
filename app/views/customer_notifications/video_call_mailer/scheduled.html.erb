@@ -1,0 +1,11 @@
+<p>Hello,</p>
+<p>Your video call has been scheduled.</p>
+<ul>
+  <li>When: <%= @scheduled_time.in_time_zone(@scheduled.scheduled_tz || Time.zone.name).strftime('%Y-%m-%d %H:%M %Z') %></li>
+  <% if @join_url.present? %>
+  <li>Join link: <a href="<%= @join_url %>"><%= @join_url %></a></li>
+  <% else %>
+  <li>Join: Open your chat window at the scheduled time to join the call.</li>
+  <% end %>
+</ul>
+<p>We look forward to speaking with you.</p>

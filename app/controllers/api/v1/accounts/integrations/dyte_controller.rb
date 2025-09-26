@@ -19,6 +19,36 @@ class Api::V1::Accounts::Integrations::DyteController < Api::V1::Accounts::BaseC
     )
   end
 
+  def reschedule
+    authorize_request
+    scheduled = ScheduledVideoCall.find_by!(conversation_id: @conversation.id)
+
+    scheduled_time = Time.zone.parse(permitted_params[:scheduled_at]) rescue nil
+    scheduled_time ||= Time.at(permitted_params[:scheduled_at].to_i) rescue nil
+    raise ActionController::ParameterMissing, 'scheduled_at' unless scheduled_time
+
+    scheduled.update!(
+      scheduled_at: scheduled_time,
+      scheduled_tz: permitted_params[:scheduled_tz].presence || scheduled.scheduled_tz,
+      notify_via: Array.wrap(permitted_params[:notify_via]).presence || scheduled.notify_via,
+      customer_email: permitted_params[:customer_email].presence || scheduled.customer_email,
+      customer_phone: permitted_params[:customer_phone].presence || scheduled.customer_phone
+    )
+
+    if (scheduled_time - 15.minutes) > Time.current
+      ScheduledVideoCallReminderJob.set(wait_until: scheduled_time - 15.minutes).perform_later(scheduled.id)
+    end
+
+    join_url = scheduled.customer_auth_token.present? ? "https://app.dyte.io/v2/meeting?authToken=#{scheduled.customer_auth_token}" : nil
+    ScheduledVideoCallNotifier.new(account: Current.account).send_initial(
+      scheduled: scheduled,
+      conversation: @conversation,
+      join_url: join_url
+    )
+
+    render json: { ok: true, scheduled_at: scheduled_time }
+  end
+
   private
 
   def authorize_request
@@ -34,7 +64,7 @@ class Api::V1::Accounts::Integrations::DyteController < Api::V1::Accounts::BaseC
   end
 
   def permitted_params
-    params.permit(:conversation_id, :message_id)
+    params.permit(:conversation_id, :message_id, :scheduled_at, :scheduled_tz, :customer_email, :customer_phone, notify_via: [])
   end
 
   def fetch_conversation
