@@ -11,6 +11,7 @@ services:
         RAILS_ENV: "production"
         RAILS_SERVE_STATIC_FILES: "true"
     image: chatwoot-local:latest
+    container_name: dep-chatwoot
     depends_on:
       - postgres
       - redis
@@ -18,8 +19,9 @@ services:
       - .env.selfhost
     volumes:
       - storage_data:/app/storage
+      - ./public/absher:/app/public/absher
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
     entrypoint: docker/entrypoints/rails.sh
     command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
     restart: unless-stopped
@@ -27,6 +29,7 @@ services:
   sidekiq:
     platform: linux/amd64
     image: chatwoot-local:latest
+    container_name: dep-sidekiq
     depends_on:
       - postgres
       - redis
@@ -39,6 +42,7 @@ services:
 
   postgres:
     image: pgvector/pgvector:pg16
+    container_name: dep-postgres
     environment:
       - POSTGRES_DB=${POSTGRES_DATABASE}
       - POSTGRES_USER=${POSTGRES_USERNAME}
@@ -51,6 +55,7 @@ services:
 
   redis:
     image: redis:alpine
+    container_name: dep-redis
     command: ["redis-server"]
     volumes:
       - redis_data:/data
@@ -60,6 +65,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog
+    container_name: dep-mailhog
     ports:
       - "127.0.0.1:1025:1025"
       - "127.0.0.1:8025:8025"
@@ -67,6 +73,7 @@ services:
 
   rag-service:
     build: ./services/rag-service
+    container_name: dep-rag-service
     environment:
       - RAG_DB_URL=${RAG_DB_URL:-postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres}
       - RAG_VECTOR_SCHEMA=rag
@@ -77,5 +84,11 @@ services:
 
 volumes:
   storage_data:
+    external: true
+    name: dep_storage_data
   postgres_data:
+    external: true
+    name: dep_postgres_data
   redis_data:
+    external: true
+    name: dep_redis_data

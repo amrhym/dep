@@ -71,7 +71,7 @@ class AccountBuilder
                      password_confirmation: user_password,
                      name: user_full_name)
     @user.type = 'SuperAdmin' if @super_admin
-    @user.confirm if @confirmed
+    @user.skip_confirmation!
     @user.save!
   end
 end

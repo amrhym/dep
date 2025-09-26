@@ -40,6 +40,29 @@ class Api::V1::Accounts::Integrations::DyteController < Api::V1::Accounts::BaseC
     end
 
     join_url = scheduled.customer_auth_token.present? ? "https://app.dyte.io/v2/meeting?authToken=#{scheduled.customer_auth_token}" : nil
+
+    # Create a message in the conversation with the updated schedule and join link
+    time_str = scheduled_time.in_time_zone(scheduled.scheduled_tz || Time.zone.name).strftime('%Y-%m-%d %H:%M %Z')
+    message_content = "🔄 Video call rescheduled to #{time_str}\n\n"
+    if join_url.present?
+      message_content += "👤 Customer join link:\n#{join_url}\n\n"
+    end
+
+    # Generate agent dashboard link to this conversation
+    agent_conversation_url = "#{request.protocol}#{request.host_with_port}/app/accounts/#{@conversation.account_id}/conversations/#{@conversation.display_id}"
+    message_content += "👨‍💼 For agents:\n"
+    message_content += "1. Open conversation: #{agent_conversation_url}\n"
+    message_content += "2. Click the 'Start Video Call' button when ready to join\n\n"
+    message_content += "Note: Agent must use the 'Start Video Call' button in the conversation toolbar to properly join the meeting."
+
+    @conversation.messages.create!(
+      account_id: @conversation.account_id,
+      inbox_id: @conversation.inbox_id,
+      message_type: :activity,
+      content: message_content,
+      sender: Current.user
+    )
+
     ScheduledVideoCallNotifier.new(account: Current.account).send_initial(
       scheduled: scheduled,
       conversation: @conversation,

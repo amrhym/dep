@@ -170,9 +170,12 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 50%;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  height: 320px;
+  max-height: 40vh;
+  border-bottom: 2px solid rgba(0,0,0,0.1);
   background: var(--w-foreground, #fff);
+  position: relative;
+  z-index: 10;
 }
   .dyte-toolbar {
     display: flex;
@@ -199,7 +202,9 @@ export default {
   }
 .dyte-iframe-wrap {
   width: 100%;
-  height: 280px;
+  flex: 1;
+  min-height: 280px;
+  overflow: hidden;
 }
 .dyte-iframe-wrap iframe {
   width: 100%;

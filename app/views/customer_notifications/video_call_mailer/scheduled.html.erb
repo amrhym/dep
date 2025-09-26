@@ -1,11 +1,15 @@
 <p>Hello,</p>
-<p>Your video call has been scheduled.</p>
+<p>Your video call with xCAI has been successfully scheduled.</p>
 <ul>
-  <li>When: <%= @scheduled_time.in_time_zone(@scheduled.scheduled_tz || Time.zone.name).strftime('%Y-%m-%d %H:%M %Z') %></li>
+  <li><strong>When:</strong> <%= @scheduled_time.in_time_zone(@scheduled.scheduled_tz || Time.zone.name).strftime('%Y-%m-%d %H:%M %Z') %></li>
   <% if @join_url.present? %>
-  <li>Join link: <a href="<%= @join_url %>"><%= @join_url %></a></li>
+  <li><strong>Your personal video call link:</strong> <a href="<%= @join_url %>" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; margin: 10px 0;">Click here to join your video call</a></li>
+  <li style="color: #666; font-size: 14px;">Please save this link - you'll need it to join at the scheduled time</li>
   <% else %>
-  <li>Join: Open your chat window at the scheduled time to join the call.</li>
+  <li><strong>Join:</strong> Open your chat window at the scheduled time to join the call.</li>
   <% end %>
 </ul>
+<p><strong>Important:</strong> Save the link above to join your video call at the scheduled time. You will also receive a reminder 15 minutes before the call starts.</p>
 <p>We look forward to speaking with you.</p>
+<hr style="border: 1px solid #e0e0e0; margin: 20px 0;">
+<p style="color: #666; font-size: 12px;">This email was sent by xCAI Support System. If you have any questions, please contact support@support.xcai.io</p>

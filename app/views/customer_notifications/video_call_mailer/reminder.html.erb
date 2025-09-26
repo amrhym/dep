@@ -1,11 +1,13 @@
 <p>Hello,</p>
-<p>This is a reminder that your video call will start in about 15 minutes.</p>
+<p>This is a reminder from xCAI that your video call will start in about 15 minutes.</p>
 <ul>
-  <li>When: <%= @scheduled_time.in_time_zone(@scheduled.scheduled_tz || Time.zone.name).strftime('%Y-%m-%d %H:%M %Z') %></li>
+  <li><strong>When:</strong> <%= @scheduled_time.in_time_zone(@scheduled.scheduled_tz || Time.zone.name).strftime('%Y-%m-%d %H:%M %Z') %></li>
   <% if @join_url.present? %>
-  <li>Join link: <a href="<%= @join_url %>"><%= @join_url %></a></li>
+  <li><strong>Your video call is ready:</strong> <a href="<%= @join_url %>" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; margin: 10px 0;">Join Video Call Now</a></li>
   <% else %>
-  <li>Join: Open your chat window now to join the call.</li>
+  <li><strong>Join:</strong> Open your chat window now to join the call.</li>
   <% end %>
 </ul>
-<p>See you soon.</p>
+<p>See you soon!</p>
+<hr style="border: 1px solid #e0e0e0; margin: 20px 0;">
+<p style="color: #666; font-size: 12px;">This email was sent by xCAI Support System. If you have any questions, please contact support@support.xcai.io</p>

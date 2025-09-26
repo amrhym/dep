@@ -68,12 +68,6 @@ class Api::V1::Widget::Integrations::DyteController < Api::V1::Widget::BaseContr
     )
 
     time_str = scheduled_time.in_time_zone(scheduled_tz || Time.zone.name).strftime('%Y-%m-%d %H:%M %Z')
-    @conversation.messages.create!(
-      account_id: @conversation.account_id,
-      inbox_id: @conversation.inbox_id,
-      message_type: :outgoing,
-      content: "Video call scheduled for #{time_str}"
-    )
 
     # Prefer a widget-based join link that auto-opens the call and chat together
     cw_payload = { source_id: @conversation.contact_inbox&.source_id, inbox_id: @conversation.inbox_id }
@@ -83,6 +77,36 @@ class Api::V1::Widget::Integrations::DyteController < Api::V1::Widget::BaseContr
                        else
                          "#{request.base_url}/widget?website_token=#{@web_widget.website_token}&locale=#{I18n.locale}&cw_autojoin=1&cw_scheduled_id=#{scheduled.id}"
                        end
+
+    # Create a video button message for agents (same as "Start Video Call Now")
+    title = "📅 Video call scheduled for #{time_str}"
+
+    @conversation.messages.create!(
+      account_id: @conversation.account_id,
+      inbox_id: @conversation.inbox_id,
+      message_type: :outgoing,
+      content_type: :integrations,
+      content: title,
+      content_attributes: {
+        type: 'dyte',
+        data: {
+          meeting_id: meeting_id
+        }
+      },
+      sender: agent
+    )
+
+    # Also create an info message with customer details
+    info_message = "👤 Customer: #{customer_email || 'Not provided'}\n"
+    info_message += "📱 Phone: #{customer_phone || 'Not provided'}\n"
+    info_message += "🔗 Customer will receive their join link via email"
+
+    @conversation.messages.create!(
+      account_id: @conversation.account_id,
+      inbox_id: @conversation.inbox_id,
+      message_type: :outgoing,
+      content: info_message
+    )
 
     ScheduledVideoCallNotifier.new(account: @web_widget.inbox.account).send_initial(
       scheduled: scheduled,

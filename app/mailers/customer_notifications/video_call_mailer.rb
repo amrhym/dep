@@ -4,7 +4,7 @@ class CustomerNotifications::VideoCallMailer < ApplicationMailer
     @scheduled = params[:scheduled]
     @join_url = params[:join_url]
     @scheduled_time = @scheduled.scheduled_at
-    mail(to: @scheduled.customer_email, subject: 'Your video call is scheduled')
+    mail(to: @scheduled.customer_email, subject: 'xCAI - Your video call is scheduled')
   end
 
   def reminder
@@ -12,6 +12,6 @@ class CustomerNotifications::VideoCallMailer < ApplicationMailer
     @scheduled = params[:scheduled]
     @join_url = params[:join_url]
     @scheduled_time = @scheduled.scheduled_at
-    mail(to: @scheduled.customer_email, subject: 'Reminder: Your video call starts soon')
+    mail(to: @scheduled.customer_email, subject: 'xCAI - Reminder: Your video call starts in 15 minutes')
   end
 end

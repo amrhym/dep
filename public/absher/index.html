@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أبشر - الصفحة الرئيسية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .header {
+            background: #fff;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo img {
+            height: 60px;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: #667eea;
+        }
+
+        .hero {
+            padding: 60px 0;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 40px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 40px 0;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: white;
+        }
+
+        .service-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .service-desc {
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .video-call-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 20px;
+        }
+
+        .video-call-btn:hover {
+            background: #45a049;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-text">أبشر</div>
+                </div>
+                <nav>
+                    <ul class="nav-menu">
+                        <li><a href="#">الرئيسية</a></li>
+                        <li><a href="#">الخدمات</a></li>
+                        <li><a href="#">الدعم</a></li>
+                        <li><a href="#">حول أبشر</a></li>
+                        <li><a href="#">اتصل بنا</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>مرحباً بك في منصة أبشر</h1>
+            <p>بوابتك الموحدة للخدمات الحكومية الإلكترونية</p>
+            <button class="video-call-btn" onclick="scheduleVideoCall()">جدولة مكالمة فيديو مع الدعم</button>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">🏢</div>
+                <div class="service-title">الخدمات الحكومية</div>
+                <div class="service-desc">الوصول إلى جميع الخدمات الحكومية من مكان واحد بسهولة وأمان</div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">📄</div>
+                <div class="service-title">الوثائق الرسمية</div>
+                <div class="service-desc">إصدار وتجديد جميع الوثائق الرسمية إلكترونياً</div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">🚗</div>
+                <div class="service-title">خدمات المرور</div>
+                <div class="service-desc">إدارة رخص القيادة والمركبات وتجديد الاستمارات</div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">✈️</div>
+                <div class="service-title">خدمات السفر</div>
+                <div class="service-desc">إصدار تصاريح السفر وإدارة جوازات السفر</div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">👥</div>
+                <div class="service-title">الأحوال المدنية</div>
+                <div class="service-desc">خدمات السجل المدني والأحوال الشخصية</div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">💼</div>
+                <div class="service-title">خدمات الأعمال</div>
+                <div class="service-desc">تسجيل الشركات والخدمات التجارية الإلكترونية</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#">سياسة الخصوصية</a>
+                <a href="#">الشروط والأحكام</a>
+                <a href="#">خريطة الموقع</a>
+                <a href="#">الأسئلة الشائعة</a>
+            </div>
+            <p>© 2024 منصة أبشر - جميع الحقوق محفوظة</p>
+        </div>
+    </footer>
+
+    <!-- Chatwoot Widget Script -->
+    <script>
+        // Function to schedule video call
+        function scheduleVideoCall() {
+            // This will trigger the Chatwoot widget to open with video scheduling
+            if (window.$chatwoot) {
+                window.$chatwoot.toggle();
+                // Send a message to initiate video call scheduling
+                setTimeout(() => {
+                    window.$chatwoot.setCustomAttributes({
+                        request_type: 'video_call',
+                        service: 'absher_support'
+                    });
+                }, 1000);
+            }
+        }
+
+        (function(d,t) {
+            var BASE_URL="https://newdep.xdec.io";
+            var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=BASE_URL+"/packs/js/sdk.js";
+            g.defer = true;
+            g.async = true;
+            s.parentNode.insertBefore(g,s);
+            g.onload=function(){
+                window.chatwootSDK.run({
+                    websiteToken: 'i1wkyfXf4ezNkSo45bnFNYJu',
+                    baseUrl: BASE_URL
+                });
+            }
+        })(document,"script");
+    </script>
+</body>
+</html>
