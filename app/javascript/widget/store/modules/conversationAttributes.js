@@ -7,7 +7,7 @@ import { getConversationAPI } from '../../api/conversation';
 
 const state = {
   id: '',
-  status: '',
+  status: null,
   assignee_id: null,
   waiting_since: null,
 };
@@ -52,7 +52,7 @@ export const mutations = {
   },
   [CLEAR_CONVERSATION_ATTRIBUTES]($state) {
     $state.id = '';
-    $state.status = '';
+    $state.status = null;
     $state.assignee_id = null;
     $state.waiting_since = null;
   },

@@ -26,15 +26,15 @@ const conversationData = computed(() => {
   const conv = currentConversation.value || {};
   const attrs = conversationAttributes.value || {};
 
-  // Merge both objects, with conversationAttributes taking precedence for status and assignee_id
-  return {
-    id: attrs.id || conv.id,
-    status: attrs.status || conv.status,
-    assignee_id: attrs.assignee_id || conv.assignee_id,
-    waiting_since: attrs.waiting_since || conv.waiting_since,
-    ...conv,
-    ...attrs
-  };
+  // Merge with attrs taking precedence only if value is not null/undefined/empty string
+  const merged = { ...conv };
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      merged[key] = value;
+    }
+  });
+
+  return merged;
 });
 
 onMounted(() => {

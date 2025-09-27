@@ -1,9 +1,8 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMapGetter } from 'dashboard/composables/store.js';
-import { API } from 'widget/helpers/axios';
 import Spinner from 'shared/components/Spinner.vue';
+import { getWaitTimeAPI } from 'widget/api/conversation';
 
 const props = defineProps({
   conversation: {
@@ -49,8 +48,7 @@ const queuePosition = computed(() => {
 });
 
 const showWaitInfo = computed(() => {
-  // Always show for testing - will display wait info regardless of status
-  return true;
+  return isWaiting.value && hasWaitTime.value;
 });
 
 const waitTimeClass = computed(() => {
@@ -64,8 +62,8 @@ const waitTimeClass = computed(() => {
 
 const fetchWaitTime = async () => {
   try {
-    const response = await API.get(`/api/v1/widget/conversations/wait_time${window.location.search}`);
-    waitData.value = response.data;
+    const { data } = await getWaitTimeAPI();
+    waitData.value = data;
     loading.value = false;
   } catch (error) {
     console.error('Failed to fetch wait time:', error);
@@ -74,6 +72,7 @@ const fetchWaitTime = async () => {
 };
 
 const startUpdates = () => {
+  if (updateTimer) return;
   fetchWaitTime();
   updateTimer = setInterval(fetchWaitTime, props.updateInterval);
 };
@@ -85,6 +84,11 @@ const stopUpdates = () => {
   }
 };
 
+watch(isWaiting, newVal => {
+  if (newVal) startUpdates();
+  else stopUpdates();
+}, { immediate: true });
+
 onMounted(() => {
   console.log('WaitTimeDisplay mounted with conversation:', {
     id: props.conversation?.id,
@@ -95,8 +99,7 @@ onMounted(() => {
     showWaitInfo: showWaitInfo.value
   });
 
-  // Always try to fetch wait time for testing, regardless of conversation status
-  startUpdates();
+  // Start/stop updates handled by watch(isWaiting)
 });
 
 onUnmounted(() => {

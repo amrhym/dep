@@ -99,3 +99,8 @@ CLAUDE.local.md
 # Histoire deployment
 .netlify
 .histoire
+
+# Additional dotenv ignores
+.env.*
+!.env.example
+!.env.*.example
