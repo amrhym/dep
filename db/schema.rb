@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_16_024703) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_26_001000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1068,6 +1068,25 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_16_024703) do
     t.index ["inbox_id"], name: "index_reporting_events_on_inbox_id"
     t.index ["name"], name: "index_reporting_events_on_name"
     t.index ["user_id"], name: "index_reporting_events_on_user_id"
+  end
+
+  create_table "scheduled_video_calls", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "conversation_id", null: false
+    t.string "meeting_id", null: false
+    t.datetime "scheduled_at", null: false
+    t.string "scheduled_tz"
+    t.string "status", default: "scheduled", null: false
+    t.string "notify_via", default: [], array: true
+    t.string "customer_email"
+    t.string "customer_phone"
+    t.text "customer_auth_token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_scheduled_video_calls_on_account_id"
+    t.index ["conversation_id"], name: "index_scheduled_video_calls_on_conversation_id"
+    t.index ["meeting_id"], name: "index_scheduled_video_calls_on_meeting_id"
+    t.index ["scheduled_at"], name: "index_scheduled_video_calls_on_scheduled_at"
   end
 
   create_table "sla_events", force: :cascade do |t|

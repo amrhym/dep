@@ -72,8 +72,7 @@ class Integrations::Jitsi::ProcessorService
     credentials = jitsi_hook.settings
     @jitsi_client ||= Jitsi.new(
       credentials['app_id'],
-      credentials['secret_key'],
-      credentials['base_url']
+      credentials['secret_key']
     )
   end
 end
