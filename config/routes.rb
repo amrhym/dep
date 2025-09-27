@@ -353,6 +353,7 @@ resource :dyte, controller: 'dyte', only: [] do
             post :toggle_typing
             post :transcript
             get  :toggle_status
+            get  :wait_time
           end
         end
         resource :contact, only: [:show, :update] do

@@ -58,4 +58,7 @@ export const getters = {
     const maxUnreadCount = Math.min(unreadCount, 3);
     return unreadAgentMessages.splice(-maxUnreadCount);
   },
+  currentConversation: _state => {
+    return _state.meta.currentConversation || null;
+  },
 };

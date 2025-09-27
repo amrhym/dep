@@ -25,8 +25,13 @@ class ScheduledVideoCallNotifier
       ).public_send(mailer_method)&.deliver_later
     end
 
-    if channels.include?('sms') && twilio_configured? && scheduled.customer_phone.present?
-      send_twilio_sms(to: scheduled.customer_phone, body: compose_text(scheduled, join_url))
+    if channels.include?('sms') && scheduled.customer_phone.present?
+      # Try to use Twilio SMS channel from database first, then fall back to ENV
+      if twilio_sms_channel_configured?
+        send_twilio_sms_via_channel(to: scheduled.customer_phone, body: compose_text(scheduled, join_url))
+      elsif twilio_configured?
+        send_twilio_sms(to: scheduled.customer_phone, body: compose_text(scheduled, join_url))
+      end
     end
 
     if channels.include?('whatsapp') && scheduled.customer_phone.present?
@@ -50,13 +55,41 @@ class ScheduledVideoCallNotifier
     ENV['TWILIO_ACCOUNT_SID'].present? && ENV['TWILIO_AUTH_TOKEN'].present? && ENV['TWILIO_FROM'].present?
   end
 
+  def twilio_sms_channel_configured?
+    # Check if there's a Twilio SMS channel configured in the database
+    @twilio_sms_channel ||= begin
+      inbox = @account.inboxes.find_by(channel_type: 'Channel::TwilioSms')
+      inbox&.channel
+    end
+    @twilio_sms_channel.present?
+  end
+
   def twilio_whatsapp_configured?
     ENV['TWILIO_ACCOUNT_SID'].present? && ENV['TWILIO_AUTH_TOKEN'].present? && ENV['TWILIO_WHATSAPP_FROM'].present?
+  end
+
+  def send_twilio_sms_via_channel(to:, body:)
+    channel = @twilio_sms_channel || begin
+      inbox = @account.inboxes.find_by(channel_type: 'Channel::TwilioSms')
+      inbox&.channel
+    end
+    return unless channel
+
+    client = Twilio::REST::Client.new(channel.account_sid, channel.auth_token)
+    client.messages.create(from: channel.phone_number, to: to, body: body)
+    Rails.logger.info "Sent SMS via Twilio channel to #{to}"
+  rescue => e
+    Rails.logger.error "Failed to send SMS via Twilio channel: #{e.message}"
+    # Fallback to environment variables if available
+    send_twilio_sms(to: to, body: body) if twilio_configured?
   end
 
   def send_twilio_sms(to:, body:)
     client = twilio_client
     client.messages.create(from: ENV['TWILIO_FROM'], to: to, body: body)
+    Rails.logger.info "Sent SMS via Twilio ENV to #{to}"
+  rescue => e
+    Rails.logger.error "Failed to send SMS via Twilio ENV: #{e.message}"
   end
 
   def send_twilio_whatsapp(to:, body:)
@@ -72,7 +105,7 @@ class ScheduledVideoCallNotifier
 
   def send_meta_whatsapp(conversation:, to:, body:)
     # Try to find a WhatsApp channel in the account
-    whatsapp_inbox = @account.inboxes.joins(:channel).where(channel: { type: 'Channel::Whatsapp' }).first
+    whatsapp_inbox = @account.inboxes.find_by(channel_type: 'Channel::Whatsapp')
     return false unless whatsapp_inbox
 
     whatsapp_channel = whatsapp_inbox.channel

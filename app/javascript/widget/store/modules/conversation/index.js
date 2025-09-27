@@ -6,6 +6,7 @@ const state = {
   conversations: {},
   meta: {
     userLastSeenAt: undefined,
+    currentConversation: null,
   },
   uiFlags: {
     allMessagesLoaded: false,

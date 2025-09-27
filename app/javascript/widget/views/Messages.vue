@@ -1,21 +1,45 @@
-<script>
-import { mapGetters } from 'vuex';
+<script setup>
+import { computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
 
 import ChatFooter from '../components/ChatFooter.vue';
 import ConversationWrap from '../components/ConversationWrap.vue';
 import DytePanel from '../components/DytePanel.vue';
+import WaitTimeDisplay from '../components/WaitTime/WaitTimeDisplay.vue';
 
-export default {
-  components: { ChatFooter, ConversationWrap, DytePanel },
-  computed: {
-    ...mapGetters({
-      groupedMessages: 'conversation/getGroupedConversation',
-    }),
-  },
-  mounted() {
-    this.$store.dispatch('conversation/setUserLastSeen');
-  },
-};
+const store = useStore();
+
+const groupedMessages = computed(() =>
+  store.getters['conversation/getGroupedConversation']
+);
+
+const currentConversation = computed(() =>
+  store.getters['conversation/currentConversation']
+);
+
+const conversationAttributes = computed(() =>
+  store.getters['conversationAttributes/getConversationParams']
+);
+
+// Create a combined conversation object with all the needed properties
+const conversationData = computed(() => {
+  const conv = currentConversation.value || {};
+  const attrs = conversationAttributes.value || {};
+
+  // Merge both objects, with conversationAttributes taking precedence for status and assignee_id
+  return {
+    id: attrs.id || conv.id,
+    status: attrs.status || conv.status,
+    assignee_id: attrs.assignee_id || conv.assignee_id,
+    waiting_since: attrs.waiting_since || conv.waiting_since,
+    ...conv,
+    ...attrs
+  };
+});
+
+onMounted(() => {
+  store.dispatch('conversation/setUserLastSeen');
+});
 </script>
 
 <template>
@@ -24,6 +48,11 @@ export default {
     style="height: 100%; position: relative;"
   >
     <DytePanel />
+    <!-- Wait Time Display - Always show for testing -->
+    <WaitTimeDisplay
+      :conversation="conversationData"
+      class="px-5 pt-3"
+    />
     <div class="flex flex-1 overflow-auto" style="min-height: 0;">
       <ConversationWrap :grouped-messages="groupedMessages" />
     </div>

@@ -18,9 +18,15 @@ export const actions = {
     commit('setConversationUIFlag', { isCreating: true });
     try {
       const { data } = await createConversationAPI(params);
-      const { messages } = data;
+      const { messages, meta } = data;
       const [message = {}] = messages;
       commit('pushMessageToConversation', message);
+      // Set the conversation metadata for wait time display
+      if (meta) {
+        commit('setCurrentConversation', meta);
+        // Also update conversation attributes with the metadata
+        dispatch('conversationAttributes/update', meta, { root: true });
+      }
       dispatch('conversationAttributes/getAttributes', {}, { root: true });
       // Emit event to notify that conversation is created and show the chat screen
       emitter.emit(ON_CONVERSATION_CREATED);

@@ -67,6 +67,12 @@ const deleteCustomAttribute = async customAttribute => {
   );
 };
 
+const getWaitTimeAPI = async () => {
+  return API.get(
+    `/api/v1/widget/conversations/wait_time${window.location.search}`
+  );
+};
+
 export {
   createConversationAPI,
   sendMessageAPI,
@@ -79,4 +85,5 @@ export {
   toggleStatus,
   setCustomAttributes,
   deleteCustomAttribute,
+  getWaitTimeAPI,
 };

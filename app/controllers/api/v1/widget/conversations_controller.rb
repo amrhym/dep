@@ -14,6 +14,17 @@ class Api::V1::Widget::ConversationsController < Api::V1::Widget::BaseController
       # TODO: Temporary fix for message type cast issue, since message_type is returning as string instead of integer
       conversation.reload
     end
+
+    # Return conversation metadata with the response
+    render json: {
+      messages: conversation.messages,
+      meta: {
+        id: conversation.id,
+        status: conversation.status,
+        assignee_id: conversation.assignee_id,
+        waiting_since: conversation.waiting_since
+      }
+    }
   end
 
   def process_update_contact
@@ -73,6 +84,16 @@ class Api::V1::Widget::ConversationsController < Api::V1::Widget::BaseController
     conversation.custom_attributes = conversation.custom_attributes.excluding(params[:custom_attribute])
     conversation.save!
     render json: conversation
+  end
+
+  def wait_time
+    calculator = WaitTimeCalculator.new(@web_widget.inbox)
+    wait_info = calculator.calculate
+
+    # Add queue position if conversation exists and is unassigned
+    wait_info[:queue_position] = calculator.position_in_queue(conversation) if conversation.present? && conversation.assignee_id.nil?
+
+    render json: wait_info
   end
 
   private

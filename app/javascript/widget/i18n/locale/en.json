@@ -33,6 +33,11 @@
     "BACK_TOMORROW": "We will be back online tomorrow",
     "BACK_IN_SOME_TIME": "We will be back online in some time"
   },
+  "WAIT_TIME": {
+    "POSITION_IN_QUEUE": "in queue",
+    "NO_AGENTS_ONLINE": "All agents are currently offline",
+    "AGENTS_AVAILABLE": "{count} agent available | {count} agents available"
+  },
   "DAY_NAMES": {
     "SUNDAY": "Sunday",
     "MONDAY": "Monday",

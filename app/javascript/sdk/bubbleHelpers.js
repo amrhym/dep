@@ -8,7 +8,7 @@ import {
 import { dispatchWindowEvent } from 'shared/helpers/CustomEventHelper';
 
 export const bubbleSVG =
-  'M240.808 240.808H122.123C56.6994 240.808 3.45695 187.562 3.45695 122.122C3.45695 56.7031 56.6994 3.45697 122.124 3.45697C187.566 3.45697 240.808 56.7031 240.808 122.122V240.808Z';
+  'M 120 10 C 180 10, 230 60, 230 120 C 230 180, 180 230, 120 230 C 60 230, 10 180, 10 120 C 10 60, 60 10, 120 10 Z M 60 80 L 60 160 L 100 160 L 100 120 L 140 120 L 140 160 L 180 160 L 180 80 L 140 80 L 140 100 L 100 100 L 100 80 Z';
 
 export const body = document.getElementsByTagName('body')[0];
 export const widgetHolder = document.createElement('div');

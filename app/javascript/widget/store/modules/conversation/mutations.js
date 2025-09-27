@@ -106,6 +106,10 @@ export const mutations = {
     $state.meta.userLastSeenAt = lastSeen;
   },
 
+  setCurrentConversation($state, conversation) {
+    $state.meta.currentConversation = conversation;
+  },
+
   setLastMessageId($state) {
     const { conversations } = $state;
     const lastMessage = Object.values(conversations).pop();

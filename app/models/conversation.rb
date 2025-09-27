@@ -75,6 +75,8 @@ class Conversation < ApplicationRecord
   scope :unassigned, -> { where(assignee_id: nil) }
   scope :assigned, -> { where.not(assignee_id: nil) }
   scope :assigned_to, ->(agent) { where(assignee_id: agent.id) }
+  scope :waiting_for_agent, -> { where(status: :open, assignee_id: nil) }
+  scope :in_queue, -> { waiting_for_agent.where.not(waiting_since: nil) }
   scope :unattended, -> { where(first_reply_created_at: nil).or(where.not(waiting_since: nil)) }
   scope :resolvable_not_waiting, lambda { |auto_resolve_after|
     return none if auto_resolve_after.to_i.zero?
@@ -169,6 +171,25 @@ class Conversation < ApplicationRecord
 
   def cached_label_list_array
     (cached_label_list || '').split(',').map(&:strip)
+  end
+
+  def waiting_time
+    return 0 unless waiting_since.present? && assignee_id.nil?
+
+    Time.current - waiting_since
+  end
+
+  def position_in_queue
+    return nil if assignee_id.present?
+
+    inbox.conversations
+         .waiting_for_agent
+         .where('created_at < ?', created_at)
+         .count + 1
+  end
+
+  def estimated_wait_time
+    WaitTimeCalculator.new(inbox).calculate
   end
 
   def notifiable_assignee_change?
