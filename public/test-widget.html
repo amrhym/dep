@@ -6,29 +6,24 @@
     <title>Widget Test</title>
 </head>
 <body>
-    <h1>Testing Chatwoot Widget</h1>
+    <h1>Testing Chatwoot Widget test </h1>
     <p>If the widget loads, you should see it in the bottom right corner.</p>
 
-    <script>
-        (function(d,t) {
-            var BASE_URL="https://newdep.xdec.io";
-            var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-            g.src=BASE_URL+"/packs/js/sdk.js";
-            g.defer = true;
-            g.async = true;
-            s.parentNode.insertBefore(g,s);
-            g.onload=function(){
-                console.log('SDK loaded, initializing widget...');
-                window.chatwootSDK.run({
-                    websiteToken: 'i1wkyfXf4ezNkSo45bnFNYJu',
-                    baseUrl: BASE_URL
-                });
-                console.log('Widget initialized');
-            };
-            g.onerror = function() {
-                console.error('Failed to load SDK');
-            };
-        })(document,"script");
-    </script>
+<script>
+  (function(d,t) {
+    var BASE_URL="http://localhost:3000";
+    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=BASE_URL+"/packs/js/sdk.js";
+    g.async = true;
+    s.parentNode.insertBefore(g,s);
+    g.onload=function(){
+      window.chatwootSDK.run({
+        websiteToken: 'n1PshxC3575zj3m83AKZtUkd',
+        baseUrl: BASE_URL
+      })
+    }
+  })(document,"script");
+</script>
+
 </body>
 </html>
