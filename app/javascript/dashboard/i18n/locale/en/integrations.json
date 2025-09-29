@@ -129,6 +129,13 @@
       "JOIN_ERROR": "There was an error joining the call, please try again",
       "CREATE_ERROR": "There was an error creating a meeting link, please try again"
     },
+    "JITSI": {
+      "CLICK_HERE_TO_JOIN": "Click here to join the call",
+      "LEAVE_THE_ROOM": "Leave the room",
+      "START_VIDEO_CALL_HELP_TEXT": "Start a new video call with the customer using Jitsi Meet",
+      "JOIN_ERROR": "Failed to join Jitsi call",
+      "CREATE_ERROR": "There was an error creating a meeting link, please try again"
+    },
     "OPEN_AI": {
       "AI_ASSIST": "AI Assist",
       "WITH_AI": " {option} with AI ",

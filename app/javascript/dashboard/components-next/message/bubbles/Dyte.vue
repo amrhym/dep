@@ -25,7 +25,7 @@ const enterFullscreen = async () => {
     if (panelRef.value && panelRef.value.requestFullscreen) {
       await panelRef.value.requestFullscreen();
     }
-  } catch (e) {}
+  } catch (e) { }
 };
 
 let pipWindow = null;
@@ -46,7 +46,7 @@ const requestPiP = async () => {
       const features = 'popup=yes,width=900,height=600,menubar=no,toolbar=no,location=no,status=no';
       window.open(meetingLink.value, 'dyte_popout', features);
     }
-  } catch (e) {}
+  } catch (e) { }
 };
 
 const popout = () => {
@@ -78,12 +78,8 @@ const action = computed(() => ({
 </script>
 
 <template>
-  <BaseAttachmentBubble
-    icon="i-ph-video-camera-fill"
-    icon-bg-color="bg-[#2781F6]"
-    sender-translation-key="CONVERSATION.SHARED_ATTACHMENT.MEETING"
-    :action="action"
-  >
+  <BaseAttachmentBubble icon="i-ph-video-camera-fill" icon-bg-color="bg-[#2781F6]"
+    sender-translation-key="CONVERSATION.SHARED_ATTACHMENT.MEETING" :action="action">
     <div v-if="!sender" class="text-sm truncate text-n-slate-12">
       <!-- Added as a fallback, where the sender is not available (Deleted) -->
       <!-- Will show the content, if senderName in BaseAttachment.vue is empty -->
@@ -94,17 +90,12 @@ const action = computed(() => ({
         <button class="btn" @click="enterFullscreen">⛶ Fullscreen</button>
         <button class="btn" @click="requestPiP">🗗 PiP</button>
         <button class="btn" @click="popout">↗ Pop out</button>
-        <button
-          class="btn leave"
-          @click="leaveTheRoom"
-        >
+        <button class="btn leave" @click="leaveTheRoom">
           {{ $t('INTEGRATION_SETTINGS.DYTE.LEAVE_THE_ROOM') }}
         </button>
       </div>
-      <iframe
-        :src="meetingLink"
-        allow="camera;microphone;fullscreen;display-capture;picture-in-picture;clipboard-write;"
-      />
+      <iframe :src="meetingLink"
+        allow="camera;microphone;fullscreen;display-capture;picture-in-picture;clipboard-write;" />
     </div>
     <div v-else>
       {{ '' }}
@@ -125,9 +116,26 @@ const action = computed(() => ({
   padding: 0.25rem;
   @apply bg-n-background;
 
-.toolbar { display:flex; gap:8px; margin-bottom: 6px; }
-  .toolbar .btn { padding: 4px 8px; font-size: 12px; border-radius: 6px; background: #eaeaea; color: #111827; border: 1px solid rgba(0,0,0,0.06); }
-  .toolbar .leave { background: #ef4444; color: #fff; border-color: #dc2626; }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .toolbar .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    background: #eaeaea;
+    color: #111827;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .toolbar .leave {
+    background: #ef4444;
+    color: #fff;
+    border-color: #dc2626;
+  }
 
   iframe {
     width: 100%;
@@ -135,10 +143,10 @@ const action = computed(() => ({
     border: 0;
   }
 
-  button {
-    position: absolute;
-    top: 0.25rem;
-    right: 0.75rem;
-  }
+  // button {
+  //   position: absolute;
+  //   top: 0.25rem;
+  //   right: 0.75rem;
+  // }
 }
 </style>

@@ -6,7 +6,7 @@ class Jitsi
   def initialize(app_id, secret_key)
     @app_id = app_id
     @secret_key = secret_key
-    @base_url = ENV.fetch('JITSI_BASE_URL', nil)
+    @base_url = ENV.fetch('JITSI_BASE_URL', 'https://jitsi.xdec.io')
   end
 
   # def generate_jwt_token(room_name, user_id, user_name, avatar_url, is_moderator = false)

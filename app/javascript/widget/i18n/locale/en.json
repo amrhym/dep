@@ -120,6 +120,10 @@
     "DYTE": {
       "CLICK_HERE_TO_JOIN": "Click here to join",
       "LEAVE_THE_ROOM": "Leave the call"
+    },
+    "JITSI": {
+      "CLICK_HERE_TO_JOIN": "Click here to join",
+      "LEAVE_THE_ROOM": "Leave the call"
     }
   },
   "PORTAL": {

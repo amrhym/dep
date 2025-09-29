@@ -37,10 +37,12 @@ export default {
     this._onConvCreated = async () => {
       if (window.chatwootDyteAutoStart) {
         try {
-          const { data } = await IntegrationAPIClient.createDyteMeeting();
+          const { data } = await IntegrationAPIClient.createJitsiMeeting();
           if (data && data.id) {
             // data.id is the integration message id, trigger join via message
-            emitter.emit('dyte:join-message', data.id);
+            emitter.emit('video:join-message', data.id);
+            // Also emit Jitsi event
+            emitter.emit('jitsi:join-message', data.id);
           }
         } catch (e) {
           // ignore
@@ -95,27 +97,17 @@ export default {
 
 <template>
   <div class="z-50 flex flex-col justify-end flex-1 w-full p-4 gap-4">
-    <TeamAvailability
-      :available-agents="availableAgents"
-      :has-conversation="!!conversationSize"
-      :unread-count="unreadMessageCount"
-      @start-conversation="startConversation"
-    />
+    <TeamAvailability :available-agents="availableAgents" :has-conversation="!!conversationSize"
+      :unread-count="unreadMessageCount" @start-conversation="startConversation" />
 
     <ArticleContainer />
 
     <div class="flex flex-col gap-2">
-      <button
-        class="button join-call-button"
-        @click="startVideoCall"
-        :style="{ background: widgetColor, borderColor: widgetColor, color: '#fff' }"
-      >
+      <button class="button join-call-button" @click="startVideoCall"
+        :style="{ background: widgetColor, borderColor: widgetColor, color: '#fff' }">
         {{ $t ? $t('Start video call now') : 'Start video call now' }}
       </button>
-      <button
-        class="button"
-        @click="openSchedule"
-      >
+      <button class="button" @click="openSchedule">
         {{ $t ? $t('Schedule a video call') : 'Schedule a video call' }}
       </button>
     </div>

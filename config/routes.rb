@@ -371,12 +371,18 @@ resource :dyte, controller: 'dyte', only: [] do
         resources :inbox_members, only: [:index]
         resources :labels, only: [:create, :destroy]
         namespace :integrations do
-resource :dyte, controller: 'dyte', only: [] do
+          resource :dyte, controller: 'dyte', only: [] do
             collection do
               post :create_a_meeting
               post :add_participant_to_meeting
               post :schedule
               post :join
+            end
+          end
+          resource :jitsi, controller: 'jitsi', only: [] do
+            collection do
+              post :create_a_meeting
+              post :add_participant_to_meeting
             end
           end
         end

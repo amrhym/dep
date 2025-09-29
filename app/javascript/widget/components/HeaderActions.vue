@@ -67,14 +67,19 @@ export default {
     },
     async startVideoCall() {
       try {
-        const { data } = await IntegrationAPIClient.createDyteMeeting();
+        // Call Jitsi directly (no fallback to Dyte)
+        const { data } = await IntegrationAPIClient.createJitsiMeeting();
         // data.id is the message ID created by the backend integration message
         const messageId = data && data.id;
         if (messageId) {
-          emitter.emit('dyte:join-message', messageId);
+          // Emit generic event that both Dyte and Jitsi panels can handle
+          emitter.emit('video:join-message', messageId);
+          // Also emit Jitsi event
+          emitter.emit('jitsi:join-message', messageId);
         }
       } catch (e) {
         // silently ignore for now, or add a small alert later
+        console.error('Jitsi video call failed:', e);
       }
     },
     closeWindow() {

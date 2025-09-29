@@ -30,12 +30,14 @@ export default {
     async handleConversationCreated() {
       // Redirect to messages page after conversation is created
       this.router.replace({ name: 'messages' });
-      // Auto-create and join Dyte meeting if requested from Home
+      // Auto-create and join video meeting if requested from Home
       if (window.chatwootDyteAutoStart) {
         try {
-          const { data } = await IntegrationAPIClient.createDyteMeeting();
+          const { data } = await IntegrationAPIClient.createJitsiMeeting();
           if (data && data.id) {
-            emitter.emit('dyte:auto-join', data.id);
+            emitter.emit('video:auto-join', data.id);
+            // Also emit Jitsi event  
+            emitter.emit('jitsi:auto-join', data.id);
           }
         } catch (e) {
           // ignore

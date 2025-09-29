@@ -33,6 +33,7 @@ import EmailBubble from './bubbles/Email/Index.vue';
 import UnsupportedBubble from './bubbles/Unsupported.vue';
 import ContactBubble from './bubbles/Contact.vue';
 import DyteBubble from './bubbles/Dyte.vue';
+import JitsiBubble from './bubbles/Jitsi.vue';
 import LocationBubble from './bubbles/Location.vue';
 import CSATBubble from './bubbles/CSAT.vue';
 import FormBubble from './bubbles/Form.vue';
@@ -299,6 +300,10 @@ const componentToRender = computed(() => {
     return DyteBubble;
   }
 
+  if (props.contentAttributes.type === 'jitsi') {
+    return JitsiBubble;
+  }
+
   if (props.contentAttributes.imageType === 'story_mention') {
     return InstagramStoryBubble;
   }
@@ -473,80 +478,50 @@ provideMessageContext({
 
 <!-- eslint-disable-next-line vue/no-root-v-if -->
 <template>
-  <div
-    v-if="shouldRenderMessage"
-    :id="`message${props.id}`"
-    class="flex w-full message-bubble-container mb-2"
-    :data-message-id="props.id"
-    :class="[
+  <div v-if="shouldRenderMessage" :id="`message${props.id}`" class="flex w-full message-bubble-container mb-2"
+    :data-message-id="props.id" :class="[
       flexOrientationClass,
       {
         'group-with-next': shouldGroupWithNext,
         'bg-n-alpha-1': showBackgroundHighlight,
       },
-    ]"
-  >
+    ]">
     <div v-if="variant === MESSAGE_VARIANTS.ACTIVITY">
       <ActivityBubble :content="content" />
     </div>
-    <div
-      v-else
-      :class="[
-        gridClass,
-        {
-          'gap-y-2': contentAttributes.externalError,
-          'w-full': variant === MESSAGE_VARIANTS.EMAIL,
-        },
-      ]"
-      class="gap-x-2"
-      :style="{
-        gridTemplateAreas: gridTemplate,
-      }"
-    >
-      <div
-        v-if="!shouldGroupWithNext && shouldShowAvatar"
-        v-tooltip.left-end="avatarTooltip"
-        class="[grid-area:avatar] flex items-end"
-      >
+    <div v-else :class="[
+      gridClass,
+      {
+        'gap-y-2': contentAttributes.externalError,
+        'w-full': variant === MESSAGE_VARIANTS.EMAIL,
+      },
+    ]" class="gap-x-2" :style="{
+      gridTemplateAreas: gridTemplate,
+    }">
+      <div v-if="!shouldGroupWithNext && shouldShowAvatar" v-tooltip.left-end="avatarTooltip"
+        class="[grid-area:avatar] flex items-end">
         <Avatar v-bind="avatarInfo" :size="24" />
       </div>
-      <div
-        class="[grid-area:bubble] flex"
-        :class="{
-          'ltr:ml-8 rtl:mr-8 justify-end': orientation === ORIENTATION.RIGHT,
-          'ltr:mr-8 rtl:ml-8': orientation === ORIENTATION.LEFT,
-          'min-w-0': variant === MESSAGE_VARIANTS.EMAIL,
-        }"
-        @contextmenu="openContextMenu($event)"
-      >
+      <div class="[grid-area:bubble] flex" :class="{
+        'ltr:ml-8 rtl:mr-8 justify-end': orientation === ORIENTATION.RIGHT,
+        'ltr:mr-8 rtl:ml-8': orientation === ORIENTATION.LEFT,
+        'min-w-0': variant === MESSAGE_VARIANTS.EMAIL,
+      }" @contextmenu="openContextMenu($event)">
         <Component :is="componentToRender" />
       </div>
-      <MessageError
-        v-if="contentAttributes.externalError"
-        class="[grid-area:meta]"
-        :class="flexOrientationClass"
-        :error="contentAttributes.externalError"
-        @retry="emit('retry')"
-      />
+      <MessageError v-if="contentAttributes.externalError" class="[grid-area:meta]" :class="flexOrientationClass"
+        :error="contentAttributes.externalError" @retry="emit('retry')" />
     </div>
     <div v-if="shouldShowContextMenu" class="context-menu-wrap">
-      <ContextMenu
-        v-if="isBubble"
-        :context-menu-position="contextMenuPosition"
-        :is-open="showContextMenu"
-        :enabled-options="contextMenuEnabledOptions"
-        :message="payloadForContextMenu"
-        hide-button
-        @open="openContextMenu"
-        @close="closeContextMenu"
-        @reply-to="handleReplyTo"
-      />
+      <ContextMenu v-if="isBubble" :context-menu-position="contextMenuPosition" :is-open="showContextMenu"
+        :enabled-options="contextMenuEnabledOptions" :message="payloadForContextMenu" hide-button
+        @open="openContextMenu" @close="closeContextMenu" @reply-to="handleReplyTo" />
     </div>
   </div>
 </template>
 
 <style lang="scss">
-.group-with-next + .message-bubble-container {
+.group-with-next+.message-bubble-container {
   .left-bubble {
     @apply ltr:rounded-tl-sm rtl:rounded-tr-sm;
   }

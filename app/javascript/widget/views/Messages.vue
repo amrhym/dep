@@ -4,9 +4,10 @@ import { mapGetters } from 'vuex';
 import ChatFooter from '../components/ChatFooter.vue';
 import ConversationWrap from '../components/ConversationWrap.vue';
 import DytePanel from '../components/DytePanel.vue';
+import JitsiPanel from '../components/JitsiPanel.vue';
 
 export default {
-  components: { ChatFooter, ConversationWrap, DytePanel },
+  components: { ChatFooter, ConversationWrap, DytePanel, JitsiPanel },
   computed: {
     ...mapGetters({
       groupedMessages: 'conversation/getGroupedConversation',
@@ -19,11 +20,10 @@ export default {
 </script>
 
 <template>
-  <div
-    class="flex flex-col flex-1 overflow-hidden rounded-b-lg bg-n-slate-2 dark:bg-n-solid-1"
-    style="height: 100%; position: relative;"
-  >
-    <DytePanel />
+  <div class="flex flex-col flex-1 overflow-hidden rounded-b-lg bg-n-slate-2 dark:bg-n-solid-1"
+    style="height: 100%; position: relative;">
+    <!-- <DytePanel /> -->
+    <JitsiPanel />
     <div class="flex flex-1 overflow-auto" style="min-height: 0;">
       <ConversationWrap :grouped-messages="groupedMessages" />
     </div>

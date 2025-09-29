@@ -201,6 +201,43 @@ dyte:
     ]
   visible_properties: ['organization_id']
 
+jitsi:
+  id: jitsi
+  logo: jitsi.png
+  i18n_key: jitsi
+  action: /jitsi
+  hook_type: account
+  allow_multiple_hooks: false
+  settings_json_schema:
+    {
+      'type': 'object',
+      'properties':
+        {
+          'app_id': { 'type': 'string' },
+          'secret_key': { 'type': 'string' },
+        },
+      'required': [],
+      'additionalProperties': false,
+    }
+  settings_form_schema:
+    [
+      {
+        'label': 'App ID (Optional - for JWT auth)',
+        'type': 'text',
+        'name': 'app_id',
+        'validation': '',
+        'help': 'Leave empty for simple iframe embedding without JWT authentication',
+      },
+      {
+        'label': 'Secret Key (Optional - for JWT auth)',
+        'type': 'text',
+        'name': 'secret_key',
+        'validation': '',
+        'help': 'Leave empty for simple iframe embedding without JWT authentication',
+      },
+    ]
+  visible_properties: []
+
 shopify:
   id: shopify
   logo: shopify.png

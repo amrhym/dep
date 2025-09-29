@@ -256,7 +256,6 @@ en:
       short_description: 'Start video/voice calls with customers directly from Chatwoot.'
       description: 'Dyte is a product that integrates audio and video functionalities into your application. With this integration, your agents can start video/voice calls with your customers directly from Chatwoot.'
       meeting_name: '%{agent_name} has started a meeting'
-      integration_apps:
     jitsi:
       name: 'Jitsi Meet'
       short_description: 'Start video/voice calls with customers using open-source Jitsi Meet.'
@@ -266,6 +265,8 @@ en:
   errors:
     jitsi:
       invalid_message_type: 'Invalid message type. Action not permitted'
+      missing_agent: 'Agent not available'
+      missing_conversation: 'Conversation not found'
     slack:
       name: 'Slack'
       short_description: 'Receive notifications and respond to conversations directly in Slack.'

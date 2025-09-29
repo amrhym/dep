@@ -1,7 +1,7 @@
 class Api::V1::Accounts::Integrations::JitsiController < Api::V1::Accounts::BaseController
   before_action :fetch_conversation, only: [:create_a_meeting]
   before_action :fetch_message, only: [:add_participant_to_meeting]
-  before_action :authorize_request
+  before_action :authorize_request, only: [:create_a_meeting, :add_participant_to_meeting]
 
   def create_a_meeting
     render_response(jitsi_processor_service.create_a_meeting(Current.user))
@@ -33,7 +33,7 @@ class Api::V1::Accounts::Integrations::JitsiController < Api::V1::Accounts::Base
   end
 
   def jitsi_processor_service
-    Integrations::Jitsi::ProcessorService.new(account: Current.account, conversation: @conversation)
+    Integrations::JitsiService.new(account: Current.account, conversation: @conversation)
   end
 
   def permitted_params
