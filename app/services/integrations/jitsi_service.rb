@@ -14,6 +14,9 @@ class Integrations::JitsiService
     message = create_a_jitsi_integration_message(meeting_data, title, agent)
     message.push_event_data
 
+    # Create video call record
+    create_video_call_record(agent, room_name)
+
     { success: true, data: meeting_data }
   rescue StandardError => e
     { error: { message: e.message }, error_code: 500 }
@@ -58,6 +61,22 @@ class Integrations::JitsiService
         },
         sender: agent
       }
+    )
+  end
+
+  def create_video_call_record(agent, room_name)
+    # Find the AccountUser record for this agent in the current account
+    account_user = account.account_users.find_by(user: agent)
+
+    return unless account_user # Skip if agent is not part of this account
+
+    contact_name = conversation.contact.name || 'Unknown'
+
+    Videocall.create!(
+      name: room_name,
+      contact_name: contact_name,
+      conversation: conversation,
+      account_user: account_user
     )
   end
 
