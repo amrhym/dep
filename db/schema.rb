@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_26_001000) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_30_120702) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1200,6 +1200,17 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_26_001000) do
     t.index ["uid", "provider"], name: "index_users_on_uid_and_provider", unique: true
   end
 
+  create_table "videocalls", force: :cascade do |t|
+    t.string "name"
+    t.string "contact_name"
+    t.bigint "conversation_id", null: false
+    t.bigint "account_user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_user_id"], name: "index_videocalls_on_account_user_id"
+    t.index ["conversation_id"], name: "index_videocalls_on_conversation_id"
+  end
+
   create_table "webhooks", force: :cascade do |t|
     t.integer "account_id"
     t.integer "inbox_id"
@@ -1230,6 +1241,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_26_001000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "inboxes", "portals"
+  add_foreign_key "videocalls", "account_users"
+  add_foreign_key "videocalls", "conversations"
   create_trigger("accounts_after_insert_row_tr", :generated => true, :compatibility => 1).
       on("accounts").
       after(:insert).
