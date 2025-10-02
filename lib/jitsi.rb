@@ -32,7 +32,8 @@ class Jitsi
       context: {
         user: {
           name: user_name || 'Guest',
-          email: email || ''
+          email: email || '',
+          moderator: is_moderator
         }
       },
       aud: 'dep_client_demo',

@@ -1,4 +1,26 @@
-// Dummy data kept separate from UI; replace with API later
+// This file is kept for reference - data is now fetched from the heatmap API
+// The structure below shows the expected format for the API response transformation
+
+// Example shape for API results:
+// VideoCall = {
+//   id: number;
+//   videoUrl: string;
+//   audioUrl: string;
+//   overallSentiment: string;
+//   overallComment: string;
+//   summary: string;
+//   transcript: Array<{
+//     speaker: string;
+//     timestamp: string; // mm:ss
+//     text: string;
+//     sentiment: string;
+//   }>;
+//   topics: string[];
+//   status: string;
+//   processedAt: string;
+// };
+
+// Sample data (no longer used - kept for reference)
 export const sampleVideoCalls = [
   {
     id: 1,
