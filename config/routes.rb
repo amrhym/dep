@@ -282,6 +282,7 @@ resource :dyte, controller: 'dyte', only: [] do
               collection do
                 post :create_a_meeting
                 post :add_participant_to_meeting
+                post :reschedule
               end
             end
             resource :shopify, controller: 'shopify', only: [:destroy] do
@@ -383,6 +384,8 @@ resource :dyte, controller: 'dyte', only: [] do
             collection do
               post :create_a_meeting
               post :add_participant_to_meeting
+              post :schedule
+              post :join
             end
           end
         end

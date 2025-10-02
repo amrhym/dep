@@ -46,6 +46,20 @@ export default {
     };
     return API.post(urlData.url);
   },
+  scheduleJitsiCall: payload => {
+    const search = buildSearchParamsWithLocale(window.location.search);
+    const urlData = {
+      url: `/api/v1/widget/integrations/jitsi/schedule${search}`,
+    };
+    return API.post(urlData.url, payload);
+  },
+  joinJitsi: payload => {
+    const search = buildSearchParamsWithLocale(window.location.search);
+    const urlData = {
+      url: `/api/v1/widget/integrations/jitsi/join${search}`,
+    };
+    return API.post(urlData.url, payload);
+  },
 
   // Smart meeting creation that tries Jitsi first, then falls back to Dyte
   createVideoMeeting: () => {

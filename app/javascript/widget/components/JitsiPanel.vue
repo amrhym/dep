@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { emitter } from 'shared/helpers/mitt';
 import { buildJitsiURL, getJitsiAuthToken } from 'shared/helpers/IntegrationHelper';
+import IntegrationAPIClient from 'widget/api/integration';
 
 export default {
   name: 'JitsiPanel',
@@ -76,13 +77,70 @@ export default {
       isVisible.value = true;
     };
 
+    const joinByMessage = async messageId => {
+      if (!messageId) return;
+      isLoading.value = true;
+      try {
+        const { data } = await IntegrationAPIClient.addParticipantToJitsiMeeting(messageId);
+        const rn = data?.room_name;
+        const url = data?.meeting_url;
+        if (rn) {
+          joinByRoom(rn);
+        } else if (url) {
+          // Extract room from URL path as a fallback
+          try {
+            const u = new URL(url);
+            const parts = u.pathname.split('/').filter(Boolean);
+            if (parts.length) joinByRoom(parts[parts.length - 1]);
+          } catch (e) {
+            // noop
+          }
+        }
+      } catch (e) {
+        // noop
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    const parseUrlAndAutoJoin = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const auto = params.get('cw_autojoin');
+      const sId = params.get('cw_scheduled_id');
+      const rn = params.get('cw_room_name');
+      if (auto === '1' || auto === 'true') {
+        // If explicit room is provided, join immediately
+        if (rn) return joinByRoom(rn);
+        // If scheduled id is present, resolve via backend and join
+        if (sId) {
+          try {
+            const { data } = await IntegrationAPIClient.joinJitsi({ scheduled_id: sId });
+            const jrn = data?.room_name;
+            const url = data?.meeting_url;
+            if (jrn) return joinByRoom(jrn);
+            if (url) {
+              try {
+                const u = new URL(url);
+                const parts = u.pathname.split('/').filter(Boolean);
+                if (parts.length) return joinByRoom(parts[parts.length - 1]);
+              } catch (e) { /* noop */ }
+            }
+          } catch (e) { /* noop */ }
+        }
+      }
+      return null;
+    };
+
     onMounted(() => {
       emitter.on('jitsi:join-room', joinByRoom);
+      emitter.on('jitsi:join-message', joinByMessage);
       document.addEventListener('fullscreenchange', handleFullscreenChange);
+      parseUrlAndAutoJoin();
     });
 
     onBeforeUnmount(() => {
       emitter.off('jitsi:join-room', joinByRoom);
+      emitter.off('jitsi:join-message', joinByMessage);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       if (pipWindow && !pipWindow.closed) {
         try { pipWindow.close(); } catch (e) { }

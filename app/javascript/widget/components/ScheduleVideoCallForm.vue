@@ -41,7 +41,12 @@ export default {
           customer_email: this.customerEmail || undefined,
           customer_phone: this.customerPhone || undefined,
         };
-        await IntegrationAPIClient.scheduleDyteCall(payload);
+        // Prefer Jitsi scheduling; if it fails, fall back to Dyte to avoid user disruption
+        try {
+          await IntegrationAPIClient.scheduleJitsiCall(payload);
+        } catch (e1) {
+          await IntegrationAPIClient.scheduleDyteCall(payload);
+        }
         this.$emit('close');
       } catch (e) {
         this.error = 'Failed to schedule the call. Please try again.';
