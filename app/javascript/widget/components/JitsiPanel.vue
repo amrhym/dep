@@ -188,6 +188,10 @@ export default {
       <button class="close-btn" @click="close">×</button>
     </div>
     <div class="dyte-iframe-wrap">
+      <!-- Debug: Show the actual iframe URL -->
+      <!-- <div style="font-size: 12px; padding: 4px; background: #f0f0f0; word-break: break-all;">
+        Iframe URL: {{ iframeSrc() }}
+      </div> -->
       <iframe :src="iframeSrc()"
         allow="camera;microphone;fullscreen;display-capture;picture-in-picture;clipboard-write;" />
     </div>

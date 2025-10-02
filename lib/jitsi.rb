@@ -32,8 +32,7 @@ class Jitsi
       context: {
         user: {
           name: user_name || 'Guest',
-          email: email || '',
-          moderator: is_moderator
+          email: email || ''
         }
       },
       aud: 'dep_client_demo',
@@ -52,6 +51,7 @@ class Jitsi
   def build_meeting_url(room_name, jwt_token = nil)
     raise 'Base URL is not configured' if @base_url.nil?
 
+    p 'jwt token________:'
     p "Building meeting URL for room: #{room_name} with base URL: #{@base_url}"
     p "full URL: #{@base_url}/#{room_name}?jwt=#{jwt_token}"
     return "#{@base_url}/#{room_name}?jwt=#{jwt_token}" if jwt_token.present?
