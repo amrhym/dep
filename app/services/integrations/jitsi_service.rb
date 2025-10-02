@@ -17,6 +17,8 @@ class Integrations::JitsiService
     # Create video call record
     create_video_call_record(agent, room_name)
 
+    # Frontend expects the integration message id in response.data.id
+    meeting_data[:id] = message.id
     { success: true, data: meeting_data }
   rescue StandardError => e
     { error: { message: e.message }, error_code: 500 }
