@@ -30,6 +30,8 @@ export default {
       availableAgents: 'agent/availableAgents',
       conversationSize: 'conversation/getConversationSize',
       unreadMessageCount: 'conversation/getUnreadMessageCount',
+      // Provide widget color used in CTA styles
+      widgetColor: 'appConfig/getWidgetColor',
     }),
   },
   mounted() {
@@ -82,7 +84,7 @@ export default {
           fullName: null,
           emailAddress: null,
           phoneNumber: null,
-          message: this.$t ? this.$t('Start video call') : 'Start video call',
+          message: this.$t ? this.$t('VIDEO.START') : 'Start video call',
           customAttributes: {},
         });
         // The ON_CONVERSATION_CREATED listener will create the meeting and auto-join
@@ -105,10 +107,10 @@ export default {
     <div class="flex flex-col gap-2">
       <button class="button join-call-button" @click="startVideoCall"
         :style="{ background: widgetColor, borderColor: widgetColor, color: '#fff' }">
-        {{ $t ? $t('Start video call now') : 'Start video call now' }}
+        {{ $t ? $t('VIDEO.START_NOW') : 'Start video call now' }}
       </button>
       <button class="button" @click="openSchedule">
-        {{ $t ? $t('Schedule a video call') : 'Schedule a video call' }}
+        {{ $t ? $t('VIDEO.SCHEDULE') : 'Schedule a video call' }}
       </button>
     </div>
 

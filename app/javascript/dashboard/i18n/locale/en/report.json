@@ -567,4 +567,32 @@
     "RESOLUTION_COUNT": "Resolution Count",
     "CONVERSATIONS": "No. of conversations"
   }
+  ,
+  "VIDEO_SENTIMENT": {
+    "HEADER": "Video Sentiment Analysis",
+    "TABLE": {
+      "HEADER": {
+        "VIDEO": "Video",
+        "AUDIO": "Audio",
+        "SENTIMENT": "Sentiment Analysis",
+        "TRANSCRIPT": "Transcript"
+      }
+    },
+    "ACTIONS": {
+      "PLAY_VIDEO": "Play Video",
+      "PLAY_AUDIO": "Play Audio",
+      "VIEW_TRANSCRIPT": "View Transcript"
+    },
+    "MODAL": {
+      "VIDEO_TITLE": "Video Player",
+      "AUDIO_TITLE": "Audio Player",
+      "SENTIMENT_TITLE": "Sentiment Analysis Details",
+      "TRANSCRIPT_TITLE": "Transcript"
+    },
+    "FIELDS": {
+      "OVERALL_SENTIMENT": "Overall Sentiment",
+      "OVERALL_COMMENT": "Overall Comment",
+      "SUMMARY": "Summary"
+    }
+  }
 }

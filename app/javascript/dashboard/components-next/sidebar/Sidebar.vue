@@ -328,6 +328,11 @@ const menuItems = computed(() => {
           label: t('SIDEBAR.REPORTS_BOT'),
           to: accountScopedRoute('bot_reports'),
         },
+        {
+          name: 'Reports Video Sentiment',
+          label: t('SIDEBAR.REPORTS_VIDEO_SENTIMENT'),
+          to: accountScopedRoute('video_sentiment_reports'),
+        },
       ],
     },
     {

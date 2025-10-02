@@ -44,7 +44,7 @@ class Integrations::JitsiService
     contact_name = conversation.contact.name&.parameterize || 'guest'
     agent_name = agent.available_name&.parameterize || 'agent'
 
-    "#{ENV.fetch('APP_NAME', 'DEP')}-#{contact_name}-#{agent_name}--#{conversation.id}-#{SecureRandom.hex(6)}"
+    "#{conversation.id}___#{ENV.fetch('APP_NAME', 'DEP')}-#{contact_name}-#{agent_name}-#{SecureRandom.hex(6)}"
   end
 
   def create_a_jitsi_integration_message(meeting_data, title, agent)

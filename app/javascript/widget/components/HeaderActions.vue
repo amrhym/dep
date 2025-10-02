@@ -122,7 +122,7 @@ export default {
     <button
       v-if="conversationStatus === 'open'"
       class="button transparent compact"
-      :title="$t('Start video call')"
+      :title="$t('VIDEO.START')"
       @click="startVideoCall"
     >
       <FluentIcon icon="video-add" size="22" class="text-n-slate-12" />

@@ -153,5 +153,10 @@
   },
   "FOOTER_REPLY_TO": {
     "REPLY_TO": "Replying to:"
+  },
+  "VIDEO": {
+    "START_NOW": "Start video call now",
+    "START": "Start video call",
+    "SCHEDULE": "Schedule a video call"
   }
 }
