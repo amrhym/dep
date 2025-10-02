@@ -27,6 +27,7 @@ class Jitsi
     room_claim = truthy ? '*' : room_name
     p "room claim: #{room_claim}"
     p "room name: #{room_name}"
+
     payload = {
       context: {
         user: {
