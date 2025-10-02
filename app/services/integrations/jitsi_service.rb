@@ -118,7 +118,7 @@ class Integrations::JitsiService
           type: 'jitsi',
           data: meeting_data
         },
-        sender: agent
+        sender: nil
       }
     )
   end
