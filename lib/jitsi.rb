@@ -7,8 +7,8 @@ class Jitsi
   config_accessor :app_id, :secret_key, :base_url
 
   def initialize(app_id = nil, secret_key = nil)
-    @app_id = ENV.fetch('JITSI_APP_ID', '')
-    @secret_key =  ENV.fetch('JITSI_SECRET_KEY', secret_key)
+    @app_id = ENV.fetch('JITSI_APP_ID', 'cce719141dfe4b84fa89461a')
+    @secret_key =  ENV.fetch('JITSI_SECRET_KEY', 'e819aa5ddfedab5590829d9c2da1e8f8eff370ee624ed3257a63a665273acda1')
     @base_url = ENV.fetch('JITSI_BASE_URL', 'https://jitsi.xdec.io')
   end
 
@@ -30,19 +30,21 @@ class Jitsi
     payload = {
       context: {
         user: {
-          name: user_name || 'test',
-          email: email || 'test@test.test'
+          name: user_name || 'Guest',
+          email: email || ''
         }
       },
-      aud: aud,
-      iss: iss,
-      sub: jwt_sub,
-      room: room_name,
-      exp: 24.hours.from_now.to_i,
-      iat: Time.current.to_i
+      aud: 'dep_client_demo',
+      iss: 'dep_client_demo',
+      sub: 'meet.jitsi',
+      room: '*',
+      iat: Time.now.to_i,
+      exp: 1.hour.from_now.to_i
+
     }
 
-    JWT.encode(payload, @secret_key, 'HS256')
+    # JWT.encode(payload, @secret_key, 'HS256')
+    JWT.encode(payload, @secret_key, 'HS256', { typ: 'JWT' })
   end
 
   def build_meeting_url(room_name, jwt_token = nil)
