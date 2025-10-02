@@ -142,10 +142,11 @@ class Api::V1::Widget::Integrations::JitsiController < Api::V1::Widget::BaseCont
 
     return render json: { error: 'Missing room_name or scheduled_id' }, status: :unprocessable_entity if room_name.blank?
 
-    response = jitsi_processor_service.add_participant_to_meeting(room_name)
+    # In widget context, customer is not an authenticated User; pass nil to let service fall back
+    response = jitsi_processor_service.add_participant_to_meeting(room_name, nil, false)
     return render_response(response) if response.is_a?(Hash) && response[:error].present?
 
-    render json: { room_name: room_name, meeting_url: response[:meeting_url] }, status: :ok
+    render json: { room_name: room_name, meeting_url: response[:meeting_url], jwt_token: response[:jwt_token] }, status: :ok
   end
 
   def add_participant_to_meeting
@@ -157,7 +158,8 @@ class Api::V1::Widget::Integrations::JitsiController < Api::V1::Widget::BaseCont
 
     room_name = @message.content_attributes['data']['room_name']
 
-    response = jitsi_processor_service.add_participant_to_meeting(room_name)
+    # Widget users are guests; no moderator privileges
+    response = jitsi_processor_service.add_participant_to_meeting(room_name, nil, false)
     if response.is_a?(Hash) && response[:error].present?
       return render_response(response)
     end

@@ -61,8 +61,8 @@ export default {
   methods: {
     async joinTheCall() {
       if (this.integrationType === 'jitsi') {
-        // Emit event to open video in JitsiPanel
-        emitter.emit('jitsi:join-room', this.meetingData.room_name);
+        // Emit event to open video in JitsiPanel with message ID to get JWT
+        emitter.emit('jitsi:join-message', this.messageId);
       } else {
         // Emit event to open video in DytePanel for backward compatibility
         emitter.emit('dyte:join-message', this.messageId);

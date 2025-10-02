@@ -13,7 +13,5 @@ export const buildJitsiURL = (roomName, jwtToken = null) => {
   return `${baseUrl}/${roomName}`;
 };
 
-// TODO [JITSI-AUTH]: Implement JWT token generation when backend supports it
-export const getJitsiAuthToken = () => {
-  return null; // For now, no JWT authentication
-};
+// Extract jwt from a Jitsi join response when available
+export const getJitsiAuthTokenFromResponse = data => data?.jwt_token || null;

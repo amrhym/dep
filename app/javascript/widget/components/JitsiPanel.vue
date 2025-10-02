@@ -1,7 +1,7 @@
 <script>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { emitter } from 'shared/helpers/mitt';
-import { buildJitsiURL, getJitsiAuthToken } from 'shared/helpers/IntegrationHelper';
+import { buildJitsiURL, getJitsiAuthTokenFromResponse } from 'shared/helpers/IntegrationHelper';
 import IntegrationAPIClient from 'widget/api/integration';
 
 export default {
@@ -13,10 +13,14 @@ export default {
     const panelRef = ref(null);
     const isFullscreen = ref(false);
 
+    const currentJwt = ref(null);
     const iframeSrc = () => {
       if (!roomName.value) return '';
-      const jwt = getJitsiAuthToken(); // TODO [JITSI-AUTH]
-      return buildJitsiURL(roomName.value, jwt);
+      console.log('JitsiPanel - roomName:', roomName.value);
+      console.log('JitsiPanel - currentJwt:', currentJwt.value);
+      const url = buildJitsiURL(roomName.value, currentJwt.value);
+      console.log('JitsiPanel iframe URL:', url);
+      return url;
     };
 
     const close = () => {
@@ -71,27 +75,38 @@ export default {
       window.open(iframeSrc(), 'jitsi_popout', features);
     };
 
-    const joinByRoom = rn => {
+    const joinByRoom = (rn, preserveJwt = false) => {
       if (!rn) return;
+      console.log('JitsiPanel - joinByRoom called with:', rn);
+      if (!preserveJwt) {
+        console.log('JitsiPanel - JWT will be null (no API call made)');
+        currentJwt.value = null;
+      } else {
+        console.log('JitsiPanel - Preserving existing JWT:', currentJwt.value);
+      }
       roomName.value = rn;
       isVisible.value = true;
     };
 
     const joinByMessage = async messageId => {
       if (!messageId) return;
+      console.log('JitsiPanel - joinByMessage called with:', messageId);
       isLoading.value = true;
       try {
         const { data } = await IntegrationAPIClient.addParticipantToJitsiMeeting(messageId);
+        console.log('JitsiPanel - API response data:', data);
         const rn = data?.room_name;
         const url = data?.meeting_url;
+        currentJwt.value = getJitsiAuthTokenFromResponse(data);
+        console.log('JitsiPanel - extracted JWT:', currentJwt.value);
         if (rn) {
-          joinByRoom(rn);
+          joinByRoom(rn, true); // preserve JWT
         } else if (url) {
           // Extract room from URL path as a fallback
           try {
             const u = new URL(url);
             const parts = u.pathname.split('/').filter(Boolean);
-            if (parts.length) joinByRoom(parts[parts.length - 1]);
+            if (parts.length) joinByRoom(parts[parts.length - 1], true); // preserve JWT
           } catch (e) {
             // noop
           }
@@ -117,12 +132,14 @@ export default {
             const { data } = await IntegrationAPIClient.joinJitsi({ scheduled_id: sId });
             const jrn = data?.room_name;
             const url = data?.meeting_url;
-            if (jrn) return joinByRoom(jrn);
+
+            currentJwt.value = getJitsiAuthTokenFromResponse(data);
+            if (jrn) return joinByRoom(jrn, true); // preserve JWT
             if (url) {
               try {
                 const u = new URL(url);
                 const parts = u.pathname.split('/').filter(Boolean);
-                if (parts.length) return joinByRoom(parts[parts.length - 1]);
+                if (parts.length) return joinByRoom(parts[parts.length - 1], true); // preserve JWT
               } catch (e) { /* noop */ }
             }
           } catch (e) { /* noop */ }

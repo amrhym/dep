@@ -10,6 +10,24 @@ class Integrations::JitsiService
       created_by: agent.id,
       created_at: Time.current.iso8601
     }
+    # Try to generate a moderator token and meeting URL for the creating agent
+    begin
+      jwt_token = jitsi_client.generate_jwt_token(
+        room_name,
+        agent.respond_to?(:id) ? agent.id : 'agent',
+        agent.respond_to?(:available_name) ? agent.available_name : 'Agent',
+        avatar_url(agent),
+        true,
+        (agent.respond_to?(:email) ? agent.email : nil)
+      )
+
+    rescue StandardError
+      jwt_token = nil
+    end
+
+    meeting_url = jitsi_client.build_meeting_url(room_name, jwt_token)
+    meeting_data[:meeting_url] = meeting_url
+    meeting_data[:jwt_token] = jwt_token if jwt_token.present?
 
     message = create_a_jitsi_integration_message(meeting_data, title, agent)
     message.push_event_data
@@ -24,18 +42,57 @@ class Integrations::JitsiService
     { error: { message: e.message }, error_code: 500 }
   end
 
-  def add_participant_to_meeting(room_name) # , user, is_moderator = false # Uncomment user and is_moderator when JWT is to be used
-    # jwt_token = jitsi_client.generate_jwt_token(
-    #   room_name,
-    #   user.id,
-    #   user.name,
-    #   avatar_url(user),
-    #   is_moderator
-    # )
+  def add_participant_to_meeting(room_name, user = nil, is_moderator = false)
+    jwt_token = nil
 
-    meeting_url = jitsi_client.build_meeting_url(room_name) #, jwt_token # Uncomment jwt_token when JWT is to be used
+    if user.present?
+      user_id, user_name = extract_user_info(user)
+      begin
+        jwt_token = jitsi_client.generate_jwt_token(
+          room_name,
+          user_id || 'guest',
+          user_name || 'Guest',
+          avatar_url(user),
+          is_moderator,
+          (user.respond_to?(:email) ? user.email : nil)
+        )
+      rescue StandardError
+        # If JWT config is missing or invalid, silently fallback to unauthenticated URL
+        jwt_token = nil
+      end
+    else
+      # Generate a guest token for the contact if JWT is configured
+      contact = begin
+        conversation.contact
+      rescue StandardError
+        nil
+      end
+      if contact.present?
+        begin
+          guest_id = contact.respond_to?(:id) ? contact.id : SecureRandom.uuid
+          guest_name = contact.respond_to?(:name) ? (contact.name.presence || 'Guest') : 'Guest'
+          guest_avatar = if contact.respond_to?(:avatar_url) && contact.avatar_url.present?
+                           contact.avatar_url
+                         else
+                           "#{ENV.fetch('FRONTEND_URL', nil)}/integrations/slack/user.png"
+                         end
+          jwt_token = jitsi_client.generate_jwt_token(
+            room_name,
+            guest_id,
+            guest_name,
+            guest_avatar,
+            false,
+            (contact.respond_to?(:email) ? contact.email : nil)
+          )
+        rescue StandardError
+          jwt_token = nil
+        end
+      end
+    end
 
-    { meeting_url: meeting_url } #, jwt_token: jwt_token } # Uncomment jwt_token when JWT is to be used
+    meeting_url = jitsi_client.build_meeting_url(room_name, jwt_token)
+
+    { meeting_url: meeting_url, jwt_token: jwt_token }
   rescue StandardError => e
     { error: { message: e.message }, error_code: 500 }
   end
@@ -83,9 +140,18 @@ class Integrations::JitsiService
   end
 
   def avatar_url(user)
-    return user.avatar_url if user.avatar_url.present?
+    return user.avatar_url if user.respond_to?(:avatar_url) && user.avatar_url.present?
 
     "#{ENV.fetch('FRONTEND_URL', nil)}/integrations/slack/user.png"
+  end
+
+  def extract_user_info(user)
+    name = if user.respond_to?(:available_name)
+             user.available_name
+           elsif user.respond_to?(:name)
+             user.name
+           end
+    [user.respond_to?(:id) ? user.id : nil, name]
   end
 
   def jitsi_hook
@@ -96,12 +162,15 @@ class Integrations::JitsiService
     if jitsi_hook&.settings
       credentials = jitsi_hook.settings
       @jitsi_client ||= Jitsi.new(
-        credentials['app_id'],
-        credentials['secret_key']
+        credentials['app_id'].presence || ENV.fetch('JWT_APP_ID', ENV.fetch('JITSI_APP_ID', nil)),
+        credentials['secret_key'].presence || ENV.fetch('JWT_APP_SECRET', ENV.fetch('JITSI_SECRET_KEY', nil))
       )
     else
-      # Use default configuration when no hook is configured
-      @jitsi_client ||= Jitsi.new(nil, nil)
+      # Use ENV fallback when no hook is configured
+      @jitsi_client ||= Jitsi.new(
+        ENV.fetch('JWT_APP_ID', ENV.fetch('JITSI_APP_ID', nil)),
+        ENV.fetch('JWT_APP_SECRET', ENV.fetch('JITSI_SECRET_KEY', nil))
+      )
     end
   end
 end

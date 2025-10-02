@@ -1,13 +1,13 @@
 <script setup>
 import { computed, ref, onBeforeUnmount } from 'vue';
-import { buildJitsiURL, getJitsiAuthToken } from 'shared/helpers/IntegrationHelper';
+import { buildJitsiURL, getJitsiAuthTokenFromResponse } from 'shared/helpers/IntegrationHelper';
 import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
 
 import { useMessageContext } from '../provider.js';
 import BaseAttachmentBubble from './BaseAttachment.vue';
 
-const { content, sender, contentAttributes } = useMessageContext();
+const { content, sender, contentAttributes, id } = useMessageContext();
 
 const { t } = useI18n();
 
@@ -40,14 +40,37 @@ const enterFullscreen = async () => {
   } catch (e) { }
 };
 
+const currentJwt = ref(null);
 const joinTheCall = async () => {
   isLoading.value = true;
   try {
-    const jwt = getJitsiAuthToken(); // TODO [JITSI-AUTH]
     if (!roomName.value) {
       throw new Error('Missing Jitsi room name');
     }
-    meetingUrl.value = buildJitsiURL(roomName.value, jwt);
+    // For dashboard, we try to request a participant link to get a JWT if available
+    try {
+      console.log('Dashboard Jitsi - content object:', content?.value);
+      console.log('Dashboard Jitsi - contentAttributes:', contentAttributes?.value);
+      console.log('Dashboard Jitsi - id from context:', id?.value);
+      const messageId = id?.value || content?.value?.id || null;
+      console.log('Dashboard Jitsi - messageId:', messageId);
+      if (messageId) {
+        // Lazy import to avoid coupling; we only need the token
+        const { default: JitsiAPI } = await import('dashboard/api/integrations/jitsi');
+        const { data } = await JitsiAPI.addParticipantToMeeting(messageId);
+        console.log('Dashboard Jitsi - API response data:', data);
+        currentJwt.value = getJitsiAuthTokenFromResponse(data);
+        console.log('Dashboard Jitsi - extracted JWT:', currentJwt.value);
+      }
+    } catch (e) {
+      console.log('Dashboard Jitsi - JWT fetch error:', e);
+      /* noop: fallback to no token */
+    }
+
+    console.log('Dashboard Jitsi - roomName:', roomName.value);
+    console.log('Dashboard Jitsi - currentJwt before building URL:', currentJwt.value);
+    meetingUrl.value = buildJitsiURL(roomName.value, currentJwt.value);
+    console.log('Dashboard Jitsi iframe URL:', meetingUrl.value);
   } catch (err) {
     useAlert(t('INTEGRATION_SETTINGS.JITSI.JOIN_ERROR', 'Failed to join Jitsi call'));
   } finally {

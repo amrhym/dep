@@ -15,10 +15,10 @@ class Api::V1::Accounts::Integrations::JitsiController < Api::V1::Accounts::Base
     end
 
     room_name = @message.content_attributes['data']['room_name']
-    Current.user.is_a?(User) # agents are moderators
+    is_moderator = Current.user.is_a?(User)
 
     render_response(
-      jitsi_processor_service.add_participant_to_meeting(room_name)
+      jitsi_processor_service.add_participant_to_meeting(room_name, Current.user, is_moderator)
     )
   end
 
